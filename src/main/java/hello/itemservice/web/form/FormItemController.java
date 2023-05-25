@@ -2,6 +2,8 @@ package hello.itemservice.web.form;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,15 @@ public class FormItemController {
 
     private final ItemRepository itemRepository;
 
+    @ModelAttribute("regions")
+    public Map<String,String> regions() {
+        Map<String,String> regions = new LinkedHashMap<>();
+        regions.put("SEOUL","서울");
+        regions.put("BUSAN","부산");
+        regions.put("JEJU","제주");
+        return regions;
+    }
+
     @GetMapping
     public String items(Model model) {
         List<Item> items = itemRepository.findAll();
@@ -30,18 +41,21 @@ public class FormItemController {
     public String item(@PathVariable long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
+
         return "form/item";
     }
 
     @GetMapping("/add")
     public String addForm(Model model) {
         model.addAttribute("item",new Item());
+
         return "form/addForm";
     }
 
     @PostMapping("/add")
     public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes) {
         log.info("item.open = {}",item.isOpen());
+        log.info("item.regions={}",item.getRegions());
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
@@ -52,6 +66,7 @@ public class FormItemController {
     public String editForm(@PathVariable Long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
+
         return "form/editForm";
     }
 
